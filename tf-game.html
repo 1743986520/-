@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>鹈鹕骑自行车 · Pelican Ride</title>
+<style>
+  html,body{
+    margin:0;height:100%;background:radial-gradient(circle at 50% 20%,#e8f6ff,#bfdcf5 70%);
+    overflow:hidden;display:flex;align-items:center;justify-content:center;
+    font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  }
+  #wrap{position:relative;width:100%;max-width:920px;padding:0 10px 34px;box-sizing:border-box;}
+  svg{width:100%;height:auto;display:block;border-radius:16px;
+      box-shadow:0 16px 46px rgba(30,70,110,.28);}
+  #hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;
+        font-size:13px;color:#5a7c96;opacity:.85}
+</style>
+</head>
+<body>
+
+<div id="wrap">
+<svg id="stage" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a8dcff"/>
+      <stop offset="100%" stop-color="#eaf8ff"/>
+    </linearGradient>
+    <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#aee0a0"/>
+      <stop offset="100%" stop-color="#79c168"/>
+    </linearGradient>
+    <radialGradient id="sunGrad">
+      <stop offset="0%" stop-color="#fff8c4"/>
+      <stop offset="100%" stop-color="#ffe066"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ===== 天空 ===== -->
+  <rect width="800" height="500" fill="url(#sky)"/>
+
+  <!-- 太阳 -->
+  <circle cx="688" cy="78" r="44" fill="url(#sunGrad)" opacity="0.95">
+    <animate attributeName="r" values="44;48;44" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- 云 -->
+  <g id="clouds" fill="#ffffff" opacity="0.9"></g>
+
+  <!-- ===== 地面 ===== -->
+  <rect x="0" y="435" width="800" height="65" fill="url(#groundGrad)"/>
+  <line x1="0" y1="435" x2="800" y2="435" stroke="#65b055" stroke-width="4"/>
+  <line id="line2" x1="0" y1="452" x2="800" y2="452" stroke="#93d283" stroke-width="4"
+        stroke-dasharray="18 26" stroke-linecap="round"/>
+  <line id="line3" x1="0" y1="478" x2="800" y2="478" stroke="#8dcb7d" stroke-width="5"
+        stroke-dasharray="30 42" stroke-linecap="round"/>
+
+  <!-- ===== 障碍 / 小鱼 ===== -->
+  <g id="obstacles"></g>
+  <g id="items"></g>
+
+  <!-- ===== 鹈鹕 + 自行车 ===== -->
+  <g id="player">
+    <!-- 后轮 -->
+    <circle cx="265" cy="370" r="65" fill="none" stroke="#2b2b2b" stroke-width="9"/>
+    <circle cx="265" cy="370" r="56" fill="none" stroke="#c9ced3" stroke-width="2"/>
+    <g id="spokesRear">
+      <line x1="211" y1="370" x2="319" y2="370" stroke="#b6bcc2" stroke-width="2"/>
+      <line x1="265" y1="316" x2="265" y2="424" stroke="#b6bcc2" stroke-width="2"/>
+      <line x1="227" y1="332" x2="303" y2="408" stroke="#b6bcc2" stroke-width="2"/>
+      <line x1="227" y1="408" x2="303" y2="332" stroke="#b6bcc2" stroke-width="2"/>
+      <circle cx="265" cy="330" r="4.5" fill="#e63946"/>
+    </g>
+    <circle cx="265" cy="370" r="9" fill="#3a3a3a"/>
+
+    <!-- 前轮 -->
+    <circle cx="545" cy="370" r="65" fill="none" stroke="#2b2b2b" stroke-width="9"/>
+    <circle cx="545" cy="370" r="56" fill="none" stroke="#c9ced3" stroke-width="2"/>
+    <g id="spokesFront">
+      <line x1="491" y1="370" x2="599" y2="370" stroke="#b6bcc2" stroke-width="2"/>
+      <line x1="545" y1="316" x2="545" y2="424" stroke="#b6bcc2" stroke-width="2"/>
+      <line x1="507" y1="332" x2="583" y2="408" stroke="#b6bcc2" stroke-width="2"/>
+      <line x1="507" y1="408" x2="583" y2="332" stroke="#b6bcc2" stroke-width="2"/>
+      <circle cx="545" cy="330" r="4.5" fill="#e63946"/>
+    </g>
+    <circle cx="545" cy="370" r="9" fill="#3a3a3a"/>
+
+    <!-- 链条 -->
+    <line x1="395" y1="353" x2="265" y2="362" stroke="#9aa0a6" stroke-width="3"/>
+    <line x1="395" y1="397" x2="265" y2="378" stroke="#9aa0a6" stroke-width="3"/>
+
+    <!-- 车架 -->
+    <g stroke="#e63946" stroke-width="9" fill="none" stroke-linecap="round">
+      <line x1="395" y1="375" x2="502" y2="252"/>
+      <line x1="345" y1="252" x2="500" y2="240"/>
+      <line x1="395" y1="375" x2="345" y2="252"/>
+      <line x1="265" y1="370" x2="395" y2="375"/>
+      <line x1="265" y1="370" x2="345" y2="252"/>
+    </g>
+    <line x1="502" y1="252" x2="545" y2="370" stroke="#3a3a3a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="500" y1="240" x2="503" y2="254" stroke="#3a3a3a" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- 车把 -->
+    <line x1="502" y1="248" x2="506" y2="220" stroke="#3a3a3a" stroke-width="8" stroke-linecap="round"/>
+    <path d="M 480,222 Q 506,210 532,224" stroke="#3a3a3a" stroke-width="8"
+          fill="none" stroke-linecap="round"/>
+    <circle cx="480" cy="222" r="5" fill="#2b2b2b"/>
+    <circle cx="532" cy="224" r="5" fill="#2b2b2b"/>
+
+    <!-- 牙盘 -->
+    <circle cx="395" cy="375" r="24" fill="none" stroke="#7a8085" stroke-width="4"/>
+    <circle cx="395" cy="375" r="24" fill="none" stroke="#b6bcc2" stroke-width="1.5"
+            stroke-dasharray="3 5"/>
+
+    <!-- 车座 -->
+    <ellipse cx="345" cy="250" rx="36" ry="10" fill="#3a3a3a"/>
+
+    <!-- 曲柄 + 脚踏 -->
+    <g>
+      <line id="crankA" x1="395" y1="375" x2="395" y2="343" stroke="#4a4a4a"
+            stroke-width="6" stroke-linecap="round"/>
+      <line id="crankB" x1="395" y1="375" x2="395" y2="407" stroke="#4a4a4a"
+            stroke-width="6" stroke-linecap="round"/>
+      <rect id="pedalA" x="385" y="333" width="20" height="9" rx="3" fill="#2f2f2f"/>
+      <rect id="pedalB" x="385" y="398" width="20" height="9" rx="3" fill="#2f2f2f"/>
+      <circle cx="395" cy="375" r="11" fill="#555"/>
+    </g>
+
+    <!-- 远侧腿 -->
+    <path id="legFar" fill="none" stroke="#c07f28" stroke-width="11"
+          stroke-linecap="round" d="M332,236 Q378,315 395,407"/>
+    <!-- 近侧腿 -->
+    <path id="legNear" fill="none" stroke="#f2a03d" stroke-width="12"
+          stroke-linecap="round" d="M350,240 Q378,315 395,343"/>
+
+    <!-- ===== 鹈鹕 ===== -->
+    <!-- 尾巴 -->
+    <path d="M 288,166 L 218,140 L 246,202 Z"
+          fill="#fdf8ee" stroke="#e0d5c0" stroke-width="3" stroke-linejoin="round"/>
+    <!-- 脖子 -->
+    <path d="M 350,162 C 366,114 398,88 428,80 L 452,110 C 420,124 400,162 390,202 Z"
+          fill="#fdf8ee" stroke="#e0d5c0" stroke-width="3" stroke-linejoin="round"/>
+    <!-- 喉囊 -->
+    <path d="M 456,104 C 468,188 552,192 590,124 Z"
+          fill="#f9cf6b" stroke="#e0a83a" stroke-width="3" stroke-linejoin="round"/>
+    <!-- 喙 -->
+    <path d="M 452,76 L 590,104 Q 601,114 590,124 L 454,104 Z"
+          fill="#f5a623" stroke="#d98b12" stroke-width="3" stroke-linejoin="round"/>
+    <line x1="470" y1="104" x2="574" y2="116" stroke="#d98b12" stroke-width="2" opacity="0.7"/>
+    <!-- 头 -->
+    <ellipse cx="442" cy="96" rx="31" ry="28"
+             fill="#fdf8ee" stroke="#e0d5c0" stroke-width="3"/>
+    <!-- 眼睛 -->
+    <circle cx="457" cy="84" r="7.5" fill="#2b2b2b"/>
+    <circle cx="459.5" cy="81" r="2.6" fill="#ffffff"/>
+    <!-- 身体 -->
+    <ellipse cx="330" cy="194" rx="64" ry="48"
+             fill="#fdf8ee" stroke="#e0d5c0" stroke-width="3"
+             transform="rotate(-8 330 194)"/>
+    <!-- 翅膀 -->
+    <g id="wing">
+      <path d="M 296,164 Q 342,146 382,180 Q 368,226 316,230 Q 288,198 296,164 Z"
+            fill="#f1e7d3" stroke="#dccdb2" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M 312,186 Q 336,196 362,196" fill="none" stroke="#dccdb2"
+            stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M 308,204 Q 332,214 356,212" fill="none" stroke="#dccdb2"
+            stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- ===== UI ===== -->
+  <g id="ui" font-family="system-ui,-apple-system,'PingFang SC',sans-serif">
+    <text id="scoreText" x="26" y="54" font-size="34" font-weight="900"
+          fill="#2b4a63" opacity="0.9">0</text>
+    <text id="bestText" x="774" y="46" font-size="18" font-weight="700"
+          fill="#5a7c96" text-anchor="end">最高 0</text>
+  </g>
+
+  <!-- 菜单 -->
+  <g id="menu">
+    <rect width="800" height="500" fill="#0b2c44" opacity="0.38"/>
+    <text x="400" y="170" font-size="54" font-weight="900" fill="#ffffff"
+          text-anchor="middle" style="letter-spacing:4px">鹈鹕骑自行车</text>
+    <text x="400" y="208" font-size="18" font-weight="600" fill="#bfe3ff"
+          text-anchor="middle" style="letter-spacing:6px">PELICAN RIDE</text>
+    <text x="400" y="286" font-size="21" font-weight="700" fill="#ffffff"
+          text-anchor="middle">空格 / ↑ / 点击屏幕 — 跳跃</text>
+    <text x="400" y="320" font-size="17" font-weight="500" fill="#cfe9ff"
+          text-anchor="middle">跳过障碍 · 收集小鱼 · 跑得越远分越高</text>
+    <g id="btnStart">
+      <rect x="316" y="362" width="168" height="58" rx="29" fill="#ffcc4d"
+            stroke="#e8ab13" stroke-width="3"/>
+      <text x="400" y="400" font-size="25" font-weight="900" fill="#6b4700"
+            text-anchor="middle">开 始</text>
+    </g>
+  </g>
+
+  <!-- 结算 -->
+  <g id="over" style="display:none">
+    <rect width="800" height="500" fill="#0b2c44" opacity="0.42"/>
+    <rect x="196" y="112" width="408" height="286" rx="26"
+          fill="#ffffff" opacity="0.96" stroke="#cfe4f5" stroke-width="3"/>
+    <text x="400" y="176" font-size="34" font-weight="900" fill="#1f3d57"
+          text-anchor="middle">哎呀，撞到了！</text>
+    <text x="400" y="238" font-size="19" font-weight="600" fill="#7c93a8"
+          text-anchor="middle">本次得分</text>
+    <text id="overScore" x="400" y="284" font-size="46" font-weight="900"
+          fill="#ff9f1c" text-anchor="middle">0</text>
+    <text id="overBest" x="400" y="320" font-size="17" font-weight="600"
+          fill="#7c93a8" text-anchor="middle">最高 0</text>
+    <g id="btnAgain">
+      <rect x="312" y="340" width="176" height="50" rx="25" fill="#43c1a0"
+            stroke="#2fa286" stroke-width="3"/>
+      <text x="400" y="373" font-size="21" font-weight="900" fill="#ffffff"
+            text-anchor="middle">再来一次</text>
+    </g>
+  </g>
+
+  <!-- 提示 -->
+  <g id="hintG" opacity="0" style="pointer-events:none">
+    <text x="400" y="130" font-size="26" font-weight="900" fill="#ffffff"
+          text-anchor="middle" stroke="#2b4a63" stroke-width="5"
+          paint-order="stroke" stroke-linejoin="round">按空格 / 点击 跳跃</text>
+  </g>
+</svg>
+<div id="hint">空格 / ↑ / 点击 → 跳跃</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+function E(tag, attrs){
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+/* ================= 调好的平衡参数 ================= */
+const W = 800, GROUND = 435;
+const PLAYER_X = 225;      // 鹈鹕屏幕锚点
+const S        = 0.50;     // 整体缩放
+
+const GRAVITY   = 2200;    // 重力
+const JUMP_V    = 950;     // 起跳初速  → 最高约 205px，滞空 0.86s
+const BASE_SPEED= 270;
+const MAX_SPEED = 620;
+
+/* 碰撞盒（比视觉窄，手感更宽容） */
+const HIT_L = 45, HIT_R = 65, HIT_H = 120;
+
+/* 障碍物尺寸（已调低，保证跳得过） */
+const OBS = {
+  cone: {w:46, h:62},
+  rock: {w:66, h:46},
+  log : {w:82, h:38}
+};
+
+/* ---------- DOM ---------- */
+const stage      = $('stage');
+const playerEl   = $('player');
+const obstaclesEl= $('obstacles');
+const itemsEl    = $('items');
+const cloudsEl   = $('clouds');
+const line2      = $('line2');
+const line3      = $('line3');
+const scoreEl    = $('scoreText');
+const bestEl     = $('bestText');
+const menuEl     = $('menu');
+const overEl     = $('over');
+const overScoreEl= $('overScore');
+const overBestEl = $('overBest');
+const hintG      = $('hintG');
+const spokesRear = $('spokesRear');
+const spokesFront= $('spokesFront');
+const crankA = $('crankA'), crankB = $('crankB');
+const pedalA = $('pedalA'), pedalB = $('pedalB');
+const legNear = $('legNear'), legFar = $('legFar');
+const wingEl  = $('wing');
+
+/* ---------- 音效 ---------- */
+let actx = null;
+function beep(freq, dur, type, vol){
+  try{
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, actx.currentTime);
+    g.gain.setValueAtTime(vol || 0.05, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  }catch(e){}
+}
+
+/* ---------- 状态 ---------- */
+const G = {
+  state: 'menu',
+  t: 0,
+  speed: BASE_SPEED,
+  y: 0, vy: 0, air: false,
+  dist: 0, score: 0, best: 0,
+  obstacles: [], fish: [],
+  obsTimer: 0, fishTimer: 0,
+  groundOffset: 0,
+  wheelAngle: 0, crankAngle: 0,
+  overAt: 0, wingPhase: 0,
+  jumpBuffer: 0
+};
+try { G.best = parseInt(localStorage.getItem('pelicanRideBest') || '0', 10) || 0; } catch(e){}
+
+/* ---------- 云 ---------- */
+const clouds = [];
+(function buildClouds(){
+  const defs = [
+    {x:120, y:78,  s:1.0, spd:26},
+    {x:420, y:150, s:0.75,spd:40},
+    {x:640, y:46,  s:0.9, spd:33},
+    {x:860, y:190, s:0.6, spd:48},
+    {x:250, y:210, s:0.55,spd:52}
+  ];
+  defs.forEach(d => {
+    const g = E('g', {transform:'translate('+d.x+','+d.y+') scale('+d.s+')'});
+    g.appendChild(E('ellipse',{cx:0,  cy:0, rx:46, ry:20, fill:'#fff'}));
+    g.appendChild(E('ellipse',{cx:38, cy:6, rx:32, ry:15, fill:'#fff'}));
+    g.appendChild(E('ellipse',{cx:-36,cy:8, rx:28, ry:13, fill:'#fff'}));
+    cloudsEl.appendChild(g);
+    clouds.push({el:g, x:d.x, y:d.y, s:d.s, spd:d.spd});
+  });
+})();
+
+/* ---------- 障碍 ---------- */
+function makeObstacle(type, x){
+  const g = E('g', {transform:'translate('+x+','+GROUND+')'});
+  if (type === 'cone'){
+    g.appendChild(E('rect',{x:-5, y:-7, width:56, height:7, rx:3.5, fill:'#d95f22'}));
+    g.appendChild(E('polygon',{points:'23,-64 46,-7 0,-7', fill:'#f4763b'}));
+    g.appendChild(E('polygon',{points:'16,-32 30,-32 36,-17 10,-17', fill:'#ffffff', opacity:.92}));
+    g.appendChild(E('polygon',{points:'23,-64 27,-64 33,-46 19,-46', fill:'#ffb27a', opacity:.6}));
+  } else if (type === 'rock'){
+    g.appendChild(E('polygon',{
+      points:'0,0 6,-23 22,-40 46,-44 62,-25 66,-4 62,0',
+      fill:'#9aa6ad', stroke:'#78848b', 'stroke-width':3, 'stroke-linejoin':'round'}));
+    g.appendChild(E('polygon',{
+      points:'10,-8 20,-29 38,-33 50,-17 48,-8',
+      fill:'#b8c3c9', opacity:.85}));
+  } else {
+    g.appendChild(E('rect',{x:0, y:-38, width:82, height:38, rx:13,
+      fill:'#b07a45', stroke:'#8a5c30', 'stroke-width':3}));
+    g.appendChild(E('ellipse',{cx:66, cy:-19, rx:9, ry:15,
+      fill:'#c9955c', stroke:'#8a5c30', 'stroke-width':2.5}));
+    g.appendChild(E('ellipse',{cx:66, cy:-19, rx:4, ry:7, fill:'none',
+      stroke:'#8a5c30', 'stroke-width':2}));
+    g.appendChild(E('ellipse',{cx:17, cy:-19, rx:8, ry:14,
+      fill:'#c9955c', stroke:'#8a5c30', 'stroke-width':2.5}));
+  }
+  return g;
+}
+
+function spawnObstacle(){
+  const keys = ['cone','rock','log'];
+  const type = keys[(Math.random()*keys.length)|0];
+  const d = OBS[type];
+  const x = W + 70;
+  const el = makeObstacle(type, x);
+  obstaclesEl.appendChild(el);
+  G.obstacles.push({x, w:d.w, h:d.h, el});
+}
+
+/* ---------- 小鱼 ---------- */
+function makeFish(){
+  const g = E('g', {});
+  g.appendChild(E('polygon',{points:'-14,0 -30,-13 -30,13', fill:'#3d9fd6'}));
+  g.appendChild(E('ellipse',{cx:0, cy:0, rx:19, ry:12, fill:'#63c8f0'}));
+  g.appendChild(E('path',{d:'M -6,-11 Q 4,-2 -6,7', fill:'none',
+    stroke:'#3d9fd6','stroke-width':2.5,'stroke-linecap':'round', opacity:.8}));
+  g.appendChild(E('circle',{cx:8, cy:-3.5, r:3.4, fill:'#12303f'}));
+  g.appendChild(E('circle',{cx:9.2, cy:-4.6, r:1.2, fill:'#fff'}));
+  return g;
+}
+
+function spawnFish(){
+  const x = W + 60;
+  const y = GROUND - (95 + Math.random()*85);
+  const el = makeFish();
+  el.setAttribute('transform', 'translate('+x+','+y+')');
+  itemsEl.appendChild(el);
+  G.fish.push({x, y, el, ph: Math.random()*6.28});
+}
+
+/* ---------- 玩家视觉 ---------- */
+function legPath(hx, hy, fx, fy){
+  const kx = hx + (fx - hx) * 0.42 + 24;
+  const ky = hy + (fy - hy) * 0.52;
+  return 'M'+hx+','+hy+' Q'+kx.toFixed(1)+','+ky.toFixed(1)+' '+fx.toFixed(1)+','+fy.toFixed(1);
+}
+
+function updatePlayerVisual(){
+  spokesRear .setAttribute('transform', 'rotate('+G.wheelAngle.toFixed(1)+',265,370)');
+  spokesFront.setAttribute('transform', 'rotate('+G.wheelAngle.toFixed(1)+',545,370)');
+
+  const th = G.crankAngle * Math.PI / 180;
+  const R = 32, cx = 395, cy = 375;
+  const ax = cx + R*Math.cos(th), ay = cy + R*Math.sin(th);
+  const bx = cx - R*Math.cos(th), by = cy - R*Math.sin(th);
+
+  crankA.setAttribute('x2', ax.toFixed(1));
+  crankA.setAttribute('y2', ay.toFixed(1));
+  crankB.setAttribute('x2', bx.toFixed(1));
+  crankB.setAttribute('y2', by.toFixed(1));
+  pedalA.setAttribute('x', (ax-10).toFixed(1));
+  pedalA.setAttribute('y', (ay-4.5).toFixed(1));
+  pedalB.setAttribute('x', (bx-10).toFixed(1));
+  pedalB.setAttribute('y', (by-4.5).toFixed(1));
+
+  legNear.setAttribute('d', legPath(350, 240, ax, ay));
+  legFar .setAttribute('d', legPath(332, 236, bx, by));
+
+  wingEl.setAttribute('transform',
+    'rotate(' + (Math.sin(G.wingPhase)*3.2).toFixed(2) + ' 330 194)');
+
+  const tx = PLAYER_X - 405 * S;
+  const ty = GROUND - G.y - 435 * S;
+  playerEl.setAttribute('transform',
+    'translate('+tx.toFixed(2)+','+ty.toFixed(2)+') scale('+S+')');
+}
+
+/* ---------- 流程 ---------- */
+function reset(){
+  G.state = 'playing';
+  G.t = 0;
+  G.speed = BASE_SPEED;
+  G.y = 0; G.vy = 0; G.air = false;
+  G.dist = 0; G.score = 0;
+  G.obsTimer = 700;          // 第一个障碍留足反应时间
+  G.fishTimer = 620;
+  G.wingPhase = 0;
+  G.jumpBuffer = 0;
+
+  G.obstacles.forEach(o => o.el.remove());
+  G.obstacles.length = 0;
+  G.fish.forEach(f => f.el.remove());
+  G.fish.length = 0;
+
+  menuEl.style.display = 'none';
+  overEl.style.display = 'none';
+  hintG.setAttribute('opacity', '1');
+  setTimeout(() => hintG.setAttribute('opacity', '0'), 1500);
+
+  scoreEl.textContent = '0';
+  beep(520, 0.1, 'sine', 0.05);
+}
+
+function doJump(){
+  if (G.air) return false;
+  G.vy = JUMP_V;
+  G.air = true;
+  beep(660, 0.13, 'square', 0.045);
+  return true;
+}
+
+function jump(){
+  // 空中按下 → 记录输入缓冲，落地立刻再跳
+  if (!doJump()) G.jumpBuffer = 0.15;
+}
+
+function gameOver(){
+  G.state = 'over';
+  G.overAt = performance.now();
+  if (G.score > G.best){
+    G.best = G.score;
+    try { localStorage.setItem('pelicanRideBest', String(G.best)); } catch(e){}
+  }
+  bestEl.textContent = '最高 ' + G.best;
+  overScoreEl.textContent = G.score;
+  overBestEl.textContent = '最高 ' + G.best;
+  overEl.style.display = '';
+  beep(300, 0.16, 'sawtooth', 0.06);
+  setTimeout(() => beep(160, 0.34, 'sawtooth', 0.07), 110);
+}
+
+function action(){
+  if (G.state === 'menu'){ reset(); return; }
+  if (G.state === 'over'){
+    if (performance.now() - G.overAt < 420) return;
+    reset(); return;
+  }
+  jump();
+}
+
+/* ---------- 更新 ---------- */
+const rScreen = 65 * S;
+
+function update(dt){
+  // 云
+  for (let i = 0; i < clouds.length; i++){
+    const c = clouds[i];
+    c.x -= c.spd * dt;
+    if (c.x < -240){ c.x = 940 + Math.random()*320; c.y = 40 + Math.random()*170; }
+    c.el.setAttribute('transform',
+      'translate('+c.x.toFixed(1)+','+c.y.toFixed(1)+') scale('+c.s+')');
+  }
+
+  G.wingPhase += dt * 5.5;
+
+  if (G.state === 'menu'){
+    G.wheelAngle += 150 * dt;
+    G.crankAngle += 90 * dt;
+    updatePlayerVisual();
+    return;
+  }
+  if (G.state === 'over'){
+    updatePlayerVisual();
+    return;
+  }
+
+  /* ---- 进行中 ---- */
+  G.t += dt;
+  G.speed = Math.min(MAX_SPEED, BASE_SPEED + G.t * 7);
+  G.dist += G.speed * dt;
+
+  const ns = Math.floor(G.dist / 12);
+  if (ns !== G.score){ G.score = ns; scoreEl.textContent = G.score; }
+
+  // 输入缓冲
+  if (G.jumpBuffer > 0){
+    G.jumpBuffer -= dt;
+    if (!G.air) { if (doJump()) G.jumpBuffer = 0; }
+  }
+
+  // 物理
+  if (G.air){
+    G.vy -= GRAVITY * dt;
+    G.y  += G.vy * dt;
+    if (G.y <= 0){
+      G.y = 0; G.vy = 0; G.air = false;
+      beep(200, 0.06, 'sine', 0.03);
+    }
+  }
+
+  // 地面
+  G.groundOffset += G.speed * dt;
+  line2.setAttribute('stroke-dashoffset', G.groundOffset.toFixed(1));
+  line3.setAttribute('stroke-dashoffset', (G.groundOffset*0.85).toFixed(1));
+
+  // 轮子 / 曲柄
+  G.wheelAngle += (G.speed / rScreen) * dt * 180 / Math.PI;
+  G.crankAngle += (G.speed / (32*S)) * dt * 180 / Math.PI * 0.42;
+
+  updatePlayerVisual();
+
+  // 生成
+  G.obsTimer -= G.speed * dt;
+  if (G.obsTimer <= 0){
+    spawnObstacle();
+    G.obsTimer = 350 + Math.random()*250 + G.speed*0.4;
+  }
+  G.fishTimer -= G.speed * dt;
+  if (G.fishTimer <= 0){
+    spawnFish();
+    G.fishTimer = 480 + Math.random()*620;
+  }
+
+  /* ---- 碰撞盒 ---- */
+  const px1 = PLAYER_X - HIT_L;
+  const px2 = PLAYER_X + HIT_R;
+  const py2 = GROUND - G.y;
+  const py1 = py2 - HIT_H;
+
+  // 障碍
+  for (let i = G.obstacles.length - 1; i >= 0; i--){
+    const o = G.obstacles[i];
+    o.x -= G.speed * dt;
+    o.el.setAttribute('transform', 'translate('+o.x.toFixed(1)+','+GROUND+')');
+
+    if (o.x + o.w < -160){
+      o.el.remove();
+      G.obstacles.splice(i, 1);
+      continue;
+    }
+    const ox1 = o.x + 7, ox2 = o.x + o.w - 7;
+    const oy1 = GROUND - o.h + 5, oy2 = GROUND;
+    if (px1 < ox2 && px2 > ox1 && py1 < oy2 && py2 > oy1){
+      gameOver();
+      return;
+    }
+  }
+
+  // 小鱼
+  for (let i = G.fish.length - 1; i >= 0; i--){
+    const f = G.fish[i];
+    f.x -= G.speed * dt;
+    const fy = f.y + Math.sin(G.t*3.2 + f.ph) * 7;
+    f.el.setAttribute('transform', 'translate('+f.x.toFixed(1)+','+fy.toFixed(1)+')');
+
+    if (f.x < -120){
+      f.el.remove();
+      G.fish.splice(i, 1);
+      continue;
+    }
+    if (px1 < f.x + 26 && px2 > f.x - 26 && py1 < fy + 20 && py2 > fy - 20){
+      f.el.remove();
+      G.fish.splice(i, 1);
+      G.dist += 130;
+      G.score = Math.floor(G.dist / 12);
+      scoreEl.textContent = G.score;
+      beep(880, 0.09, 'sine', 0.05);
+      setTimeout(() => beep(1180, 0.09, 'sine', 0.04), 70);
+    }
+  }
+}
+
+/* ---------- 主循环 ---------- */
+let lastT = 0;
+function loop(now){
+  if (!lastT) lastT = now;
+  let dt = (now - lastT) / 1000;
+  lastT = now;
+  if (dt > 0.05) dt = 0.05;
+  if (dt < 0) dt = 0;
+  update(dt);
+  requestAnimationFrame(loop);
+}
+
+/* ---------- 输入 ---------- */
+window.addEventListener('keydown', function(e){
+  if (e.code === 'Space' || e.code === 'ArrowUp' ||
+      e.code === 'KeyW'  || e.code === 'Enter'){
+    e.preventDefault();
+    action();
+  }
+}, {passive:false});
+
+stage.addEventListener('pointerdown', function(e){
+  e.preventDefault();
+  action();
+});
+
+window.addEventListener('blur', function(){ lastT = 0; });
+
+/* ---------- 启动 ---------- */
+bestEl.textContent = '最高 ' + G.best;
+updatePlayerVisual();
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>

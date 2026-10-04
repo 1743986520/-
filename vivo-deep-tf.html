@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>鹈鹕骑自行车</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 70%, #90EE90 70%, #90EE90 100%);
+    overflow: hidden;
+  }
+
+  .scene {
+    width: 500px;
+    height: 300px;
+    position: relative;
+  }
+
+  /* 整体前进动画 */
+  .rider {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    animation: moveForward 6s linear infinite;
+  }
+
+  @keyframes moveForward {
+    0%   { transform: translateX(-150px); }
+    100% { transform: translateX(500px); }
+  }
+
+  /* 车轮旋转 */
+  .wheel {
+    animation: spin 1s linear infinite;
+    transform-origin: center;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* 鹈鹕身体上下起伏 */
+  .pelican-body {
+    animation: bounce 0.5s ease-in-out infinite alternate;
+    transform-origin: bottom center;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-4px); }
+  }
+
+  /* 大嘴巴微微张合 */
+  .beak {
+    animation: beakMove 1s ease-in-out infinite alternate;
+    transform-origin: 0% 50%;
+  }
+
+  @keyframes beakMove {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(5deg); }
+  }
+
+  /* 脚踏板转动 */
+  .pedal-group {
+    animation: spin 1s linear infinite;
+    transform-origin: 250px 200px;
+  }
+
+  /* 地面 */
+  .ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background: #7CCD7C;
+    border-top: 3px solid #5CAD5C;
+  }
+
+  /* 云朵 */
+  .cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.8;
+    animation: cloudMove 20s linear infinite;
+  }
+
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+  }
+
+  .cloud1 {
+    width: 80px; height: 25px;
+    top: 40px; left: -100px;
+    animation-duration: 25s;
+  }
+  .cloud1::before { width: 35px; height: 35px; top: -18px; left: 10px; }
+  .cloud1::after  { width: 45px; height: 45px; top: -25px; left: 30px; }
+
+  .cloud2 {
+    width: 100px; height: 30px;
+    top: 80px; left: -150px;
+    animation-duration: 30s;
+    animation-delay: -10s;
+  }
+  .cloud2::before { width: 40px; height: 40px; top: -20px; left: 15px; }
+  .cloud2::after  { width: 55px; height: 55px; top: -30px; left: 40px; }
+
+  @keyframes cloudMove {
+    from { transform: translateX(0); }
+    to   { transform: translateX(700px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <!-- 云朵 -->
+  <div class="cloud cloud1"></div>
+  <div class="cloud cloud2"></div>
+
+  <!-- 地面 -->
+  <div class="ground"></div>
+
+  <!-- 骑车的鹈鹕 -->
+  <div class="rider">
+    <svg width="300" height="250" viewBox="0 0 300 250">
+      <!-- 自行车 -->
+      <g class="bike">
+        <!-- 后轮 -->
+        <g class="wheel" style="transform-origin: 80px 200px;">
+          <circle cx="80" cy="200" r="35" fill="none" stroke="#333" stroke-width="4"/>
+          <circle cx="80" cy="200" r="5" fill="#333"/>
+          <!-- 辐条 -->
+          <line x1="80" y1="165" x2="80" y2="235" stroke="#666" stroke-width="1"/>
+          <line x1="45" y1="200" x2="115" y2="200" stroke="#666" stroke-width="1"/>
+          <line x1="55" y1="175" x2="105" y2="225" stroke="#666" stroke-width="1"/>
+          <line x1="55" y1="225" x2="105" y2="175" stroke="#666" stroke-width="1"/>
+        </g>
+
+        <!-- 前轮 -->
+        <g class="wheel" style="transform-origin: 220px 200px;">
+          <circle cx="220" cy="200" r="35" fill="none" stroke="#333" stroke-width="4"/>
+          <circle cx="220" cy="200" r="5" fill="#333"/>
+          <line x1="220" y1="165" x2="220" y2="235" stroke="#666" stroke-width="1"/>
+          <line x1="185" y1="200" x2="255" y2="200" stroke="#666" stroke-width="1"/>
+          <line x1="195" y1="175" x2="245" y2="225" stroke="#666" stroke-width="1"/>
+          <line x1="195" y1="225" x2="245" y2="175" stroke="#666" stroke-width="1"/>
+        </g>
+
+        <!-- 车架 -->
+        <line x1="80" y1="200" x2="150" y2="130" stroke="#FF6B6B" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="130" x2="220" y2="200" stroke="#FF6B6B" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="130" x2="80" y2="200" stroke="#FF6B6B" stroke-width="5" stroke-linecap="round"/>
+        <line x1="150" y1="130" x2="150" y2="200" stroke="#FF6B6B" stroke-width="5" stroke-linecap="round"/>
+
+        <!-- 车把 -->
+        <line x1="150" y1="130" x2="130" y2="110" stroke="#FF6B6B" stroke-width="5" stroke-linecap="round"/>
+        <line x1="115" y1="110" x2="145" y2="110" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+
+        <!-- 车座 -->
+        <ellipse cx="150" cy="125" rx="18" ry="6" fill="#333"/>
+
+        <!-- 脚踏板组 -->
+        <g class="pedal-group">
+          <line x1="250" y1="200" x2="250" y2="200" stroke="none"/>
+          <circle cx="250" cy="200" r="0" fill="none"/>
+          <!-- 左脚踏 -->
+          <rect x="242" y="180" width="16" height="6" fill="#333" rx="2"/>
+          <!-- 右脚踏 -->
+          <rect x="242" y="214" width="16" height="6" fill="#333" rx="2"/>
+          <!-- 曲柄 -->
+          <line x1="250" y1="200" x2="250" y2="183" stroke="#555" stroke-width="3"/>
+          <line x1="250" y1="200" x2="250" y2="217" stroke="#555" stroke-width="3"/>
+        </g>
+        <!-- 修正脚踏位置到中轴 -->
+        <g transform="translate(-100, 0)">
+          <g class="pedal-group">
+            <circle cx="150" cy="200" r="8" fill="#444"/>
+            <line x1="150" y1="200" x2="150" y2="175" stroke="#666" stroke-width="4"/>
+            <rect x="140" y="170" width="20" height="8" fill="#333" rx="3"/>
+            <line x1="150" y1="200" x2="150" y2="225" stroke="#666" stroke-width="4"/>
+            <rect x="140" y="222" width="20" height="8" fill="#333" rx="3"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- 鹈鹕 -->
+      <g class="pelican-body">
+        <!-- 身体 -->
+        <ellipse cx="150" cy="95" rx="35" ry="28" fill="#FFFFFF" stroke="#DDD" stroke-width="2"/>
+        
+        <!-- 翅膀 -->
+        <ellipse cx="130" cy="90" rx="25" ry="15" fill="#F5F5F5" stroke="#DDD" stroke-width="2" transform="rotate(-20 130 90)"/>
+        
+        <!-- 脖子 -->
+        <path d="M 165 75 Q 180 50 175 35" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round"/>
+        <path d="M 165 75 Q 180 50 175 35" fill="none" stroke="#DDD" stroke-width="20" stroke-linecap="round" opacity="0.3"/>
+        
+        <!-- 头 -->
+        <circle cx="175" cy="30" r="18" fill="#FFFFFF" stroke="#DDD" stroke-width="2"/>
+        
+        <!-- 眼睛 -->
+        <circle cx="182" cy="26" r="3" fill="#333"/>
+        <circle cx="183" cy="25" r="1" fill="white"/>
+        
+        <!-- 大嘴巴（上喙） -->
+        <g class="beak">
+          <path d="M 190 30 Q 240 25 250 40 Q 230 42 195 38 Z" fill="#FFA500" stroke="#E69500" stroke-width="1.5"/>
+          <!-- 下喙 -->
+          <path d="M 192 35 Q 235 38 248 42 Q 225 50 193 42 Z" fill="#FFB347" stroke="#E69500" stroke-width="1"/>
+          <!-- 喉囊 -->
+          <path d="M 195 40 Q 220 55 240 45 Q 215 58 195 48 Z" fill="#FFCC80" opacity="0.7"/>
+        </g>
+        
+        <!-- 头顶小毛 -->
+        <path d="M 170 15 Q 172 8 175 12 Q 178 6 180 14" fill="none" stroke="#DDD" stroke-width="2" stroke-linecap="round"/>
+        
+        <!-- 腿 -->
+        <line x1="140" y1="120" x2="145" y2="145" stroke="#FFA500" stroke-width="5" stroke-linecap="round"/>
+        <line x1="160" y1="120" x2="155" y2="145" stroke="#FFA500" stroke-width="5" stroke-linecap="round"/>
+        
+        <!-- 脚（踩在踏板上） -->
+        <ellipse cx="145" cy="148" rx="8" ry="4" fill="#FF8C00"/>
+        <ellipse cx="155" cy="173" rx="8" ry="4" fill="#FF8C00"/>
+        
+        <!-- 翅膀（抓车把） -->
+        <line x1="125" y1="85" x2="130" y2="110" stroke="#F5F5F5" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="130" cy="112" r="6" fill="#FFFFFF" stroke="#DDD" stroke-width="1.5"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+</body>
+</html>
